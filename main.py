@@ -26,7 +26,7 @@ async def main():
                                 print("Вмикаю розетку")
                                 d.turn_on()
                     
-                    await asyncio.sleep(3600)
+                    await asyncio.sleep(1800)
 
                 data = d.status()
                 if 'Error' in data:
