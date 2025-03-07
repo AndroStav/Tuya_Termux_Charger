@@ -1,6 +1,7 @@
-import tinytuya, subprocess, json, asyncio, logging, configparser
+import tinytuya, subprocess, json, time, logging, configparser
 
-logging.basicConfig(level=logging.INFO, filename="main.log", format="%(asctime)s %(levelname)s [%(funcName)s]: %(message)s")
+logging.basicConfig(level=logging.INFO, filename="main.log", 
+                    format="%(asctime)s %(levelname)s [%(funcName)s]: %(message)s")
 
 def load_config(filename):
     config = configparser.ConfigParser()
@@ -13,7 +14,7 @@ def load_config(filename):
     logging.info("Конфігурація завантажена")
     return config
 
-async def main():
+def main():
     config = load_config("config.ini")
     if config is None:
         return 1
@@ -31,7 +32,8 @@ async def main():
     while True:
         try:            
             logging.debug("Отримую дані про заряд")
-            battery = int(json.loads(subprocess.run(['termux-battery-status'], capture_output=True, text=True).stdout)['percentage'])
+            battery = int(json.loads(subprocess.run(['termux-battery-status'], 
+                                                    capture_output=True, text=True).stdout)['percentage'])
             logging.debug(f"battery: {battery}%")
             if battery < 50:
                 while battery < 90:
@@ -48,9 +50,10 @@ async def main():
                             logging.info(f"Вмикаю розетку: {battery}%")
                             d.turn_on()
                     
-                    await asyncio.sleep(DELAY)
+                    time.sleep(DELAY)
                     logging.debug("Отримую дані про заряд")
-                    battery = int(json.loads(subprocess.run(['termux-battery-status'], capture_output=True, text=True).stdout)['percentage'])
+                    battery = int(json.loads(subprocess.run(['termux-battery-status'], 
+                                                            capture_output=True, text=True).stdout)['percentage'])
                     logging.debug(f"battery: {battery}%")
 
                 logging.debug("Отримую дані від розетки")
@@ -66,17 +69,12 @@ async def main():
                         logging.info(f"Вимикаю розетку: {battery}%")
                         d.turn_off()
 
-            await asyncio.sleep(DELAY)
+            time.sleep(DELAY)
 
         except Exception as e:
             print(e)
             logging.error(e)
-            await asyncio.sleep(DELAY)
-
-        except asyncio.CancelledError as e:
-            print(e)
-            logging.error(e)
-            await asyncio.sleep(DELAY)
+            time.sleep(DELAY)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
